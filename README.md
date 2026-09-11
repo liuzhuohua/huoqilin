@@ -131,9 +131,8 @@ huoqilin/
 │       └── scorer.py         # 100 分制评分 + MOS + 红绿灯
 ├── assets/
 │   ├── index.html            # 火麒麟前端 (单页应用)
+│   ├── douyin_qrcode.png     # 作者抖音二维码
 │   └── watchlist.json        # 自选股 (运行时生成)
-├── scripts/
-│   └── _device_login.py      # GitHub device-flow helper (开发用)
 └── dist/火麒麟.exe           # 打包产物 (本地构建, 不入库)
 ```
 
@@ -169,6 +168,31 @@ python -m firekylin.score.scorer
 
 本系统仅作为投资分析工具, 所有数据按公开公式计算. **不构成任何投资建议**.
 投资有风险, 入市需谨慎. 请独立判断, 盈亏自负.
+
+---
+
+## 🎯 作者实战成绩
+
+本系统由作者基于自身实战经验开发. 作者采用本系统评分 + MOS 公式作为辅助决策工具:
+
+> 📈 **2 年不到, 实战最高收益率 700%+** (期间峰值曾达 700%, 当前最高记录)
+
+> 💡 战绩不代表未来收益, 系统只是辅助工具, 投资决策仍需独立判断.
+
+---
+
+## 📱 联系作者
+
+扫码关注作者抖音, 获取最新实战分享与系统更新动态:
+
+<p align="center">
+  <img src="assets/douyin_qrcode.png" alt="作者抖音二维码" width="240">
+</p>
+
+<p align="center">
+  <b>抖音号: liuzhuohua</b><br>
+  <i>简单其实是最难做到的事</i>
+</p>
 
 ---
 
