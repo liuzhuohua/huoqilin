@@ -1,0 +1,39 @@
+# ---- 火麒麟 / firekylin ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 打包产物 (本地用, 不入库)
+build/
+dist/
+*.spec
+*.exe
+*.app
+
+# 运行时数据
+huoqilin.log
+*.log
+
+# BaoStock / finshare 缓存 (可重建)
+assets/stock_list.json
+assets/stock_list.meta.json
+assets/portfolios/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+ENV/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# 环境变量
+.env
+.env.local

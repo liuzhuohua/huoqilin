@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>火麒麟 · 价值投资综合评估系统</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* =========================================================================
+   火麒麟 (Huoqilin) — 价值投资综合评估系统, 中文品牌, 深色主题
+   ========================================================================= */
+:root {
+  --bg-0: #0d1117;
+  --bg-1: #161b22;
+  --bg-2: #1c232c;
+  --bg-3: #232b36;
+  --bd:  #2d3742;
+  --fg:  #e6edf3;
+  --fg2: #9aa5b1;
+  --ac:  #f0883e;            /* 火麒麟主色: 暖橙 */
+  --ac2: #ff7b00;
+  --green: #3fb950;
+  --gray:  #8b949e;
+  --red:   #f85149;
+  --yellow:#d29922;
+  --shadow: 0 6px 24px rgba(0,0,0,.35);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  background: var(--bg-0);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Segoe UI, Roboto, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+}
+/* 顶栏 */
+.topbar {
+  height: 56px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--ac);
+}
+.brand svg { width: 28px; height: 28px; }
+.nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.nav button {
+  background: transparent;
+  border: 0;
+  color: var(--fg2);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  font: inherit;
+}
+.nav button:hover { background: var(--bg-2); color: var(--fg); }
+.nav button.active {
+  background: var(--bg-2);
+  color: var(--ac);
+  border-bottom: 2px solid var(--ac);
+}
+.search {
+  position: relative;
+}
+.search input {
+  background: var(--bg-2);
+  border: 1px solid var(--bd);
+  color: var(--fg);
+  padding: 8px 12px 8px 36px;
+  border-radius: 8px;
+  width: 320px;
+  font: inherit;
+}
+.search::before {
+  content: "🔍";
+  position: absolute;
+  left: 12px; top: 8px;
+}
+.search input:focus { outline: 0; border-color: var(--ac); }
+.dropdown {
+  position: absolute; top: 44px; left: 0; right: 0;
+  background: var(--bg-2); border: 1px solid var(--bd); border-radius: 8px;
+  max-height: 360px; overflow-y: auto; z-index: 100;
+  box-shadow: var(--shadow);
+}
+.dropdown .item { padding: 8px 12px; cursor: pointer; }
+.dropdown .item:hover { background: var(--bg-3); }
+.dropdown .item .code { color: var(--fg2); font-size: 12px; margin-left: 8px; }
+
+/* 主区 */
+main { height: calc(100% - 56px); overflow: auto; }
+.page { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+.page h1 { margin: 0 0 8px; font-size: 22px; }
+.page .sub { color: var(--fg2); margin: 0 0 18px; font-size: 13px; }
+
+/* 概览卡片 */
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.card .label { color: var(--fg2); font-size: 12px; margin-bottom: 6px; }
+.card .value { font-size: 26px; font-weight: 700; }
+.card.green  { border-left: 4px solid var(--green); }
+.card.gray   { border-left: 4px solid var(--gray); }
+.card.red    { border-left: 4px solid var(--red); }
+.card.orange { border-left: 4px solid var(--ac); }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; background: var(--bg-1); border-radius: 10px; overflow: hidden; border: 1px solid var(--bd); }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--bd); font-size: 13px; }
+th { background: var(--bg-2); color: var(--fg2); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+tr:hover { background: var(--bg-2); cursor: pointer; }
+tbody tr:last-child td { border-bottom: 0; }
+td .num { font-variant-numeric: tabular-nums; }
+
+/* 信号灯 */
+.signal { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 11px; }
+.signal.onsale { background: rgba(63, 185, 80, .15); color: var(--green); border: 1px solid rgba(63, 185, 80, .4); }
+.signal.watch   { background: rgba(139, 148, 158, .15); color: var(--gray); border: 1px solid rgba(139, 148, 158, .4); }
+.signal.over    { background: rgba(248, 81, 73, .15); color: var(--red); border: 1px solid rgba(248, 81, 73, .4); }
+
+/* 筛选条 */
+.filterbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.filterbar input, .filterbar select {
+  background: var(--bg-2); border: 1px solid var(--bd); color: var(--fg);
+  padding: 7px 10px; border-radius: 6px; font: inherit;
+}
+.filterbar input[type="number"] { width: 100px; }
+.filterbar button {
+  background: var(--ac); color: #1a1a1a; border: 0; padding: 7px 16px;
+  border-radius: 6px; cursor: pointer; font-weight: 600;
+}
+.filterbar button:hover { background: var(--ac2); }
+
+/* 单股详情 */
+.detail-grid { display: grid; grid-template-columns: 320px 1fr; gap: 18px; }
+.detail-card {
+  background: var(--bg-1); border: 1px solid var(--bd); border-radius: 10px;
+  padding: 18px;
+}
+.detail-card h2 { margin: 0 0 14px; font-size: 18px; }
+.big-score { text-align: center; padding: 18px 0; }
+.big-score .num {
+  font-size: 56px; font-weight: 800; color: var(--ac); line-height: 1;
+}
+.big-score .lbl { color: var(--fg2); font-size: 13px; margin-top: 6px; }
+.kv { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--bd); }
+.kv:last-child { border-bottom: 0; }
+.kv .k { color: var(--fg2); }
+.kv .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* 评分细则 */
+.score-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bd); }
+.score-row:last-child { border-bottom: 0; }
+.score-row .name { flex: 1; }
+.score-row .pts { color: var(--ac); font-weight: 700; width: 60px; text-align: right; font-variant-numeric: tabular-nums; }
+.score-row .bar { flex: 2; height: 6px; background: var(--bg-2); border-radius: 3px; overflow: hidden; }
+.score-row .bar-fill { height: 100%; background: linear-gradient(90deg, var(--ac), var(--ac2)); }
+
+/* 风险提示 / 通用 */
+.alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; }
+.alert.info { background: rgba(240, 136, 62, .1); border: 1px solid rgba(240, 136, 62, .3); color: var(--ac); }
+.alert.warn { background: rgba(210, 153, 34, .1); border: 1px solid rgba(210, 153, 34, .3); color: var(--yellow); }
+
+.kbd { background: var(--bg-2); border: 1px solid var(--bd); border-radius: 4px; padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 12px; }
+.muted { color: var(--fg2); }
+.up   { color: var(--green); }
+.down { color: var(--red); }
+
+/* 加载 */
+.loading { text-align: center; padding: 40px; color: var(--fg2); }
+.spinner {
+  width: 24px; height: 24px; border: 3px solid var(--bd); border-top-color: var(--ac);
+  border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block;
+  vertical-align: middle; margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .detail-grid { grid-template-columns: 1fr; }
+  .search input { width: 200px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2 L3 8 L7 14 L12 22 L17 14 L21 8 Z"/>
+      <circle cx="12" cy="11" r="2.5" fill="currentColor"/>
+    </svg>
+    火麒麟 · 价值投资综合评估系统
+  </div>
+  <div class="nav" id="nav">
+    <button data-page="dashboard" class="active">概览</button>
+    <button data-page="screen">智能筛选</button>
+    <button data-page="watchlist">自选股</button>
+    <button data-page="portfolio">投资组合</button>
+    <button data-page="learn">投资课堂</button>
+    <button data-page="about">关于系统</button>
+  </div>
+  <div class="search">
+    <input id="search" placeholder="搜索代码 / 名称 (例: 600519 / 茅台)">
+    <div class="dropdown" id="dropdown" style="display:none"></div>
+  </div>
+</div>
+
+<main>
+  <!-- ========== 概览 ========== -->
+  <div class="page" id="page-dashboard">
+    <h1>市场概览</h1>
+    <p class="sub">基于公开免费数据源 (finshare / 东方财富 / 腾讯 / 新浪 / BaoStock), 实时统计</p>
+    <div class="cards" id="dashCards">
+      <div class="card orange"><div class="label">跟踪股票数</div><div class="value" id="dashCount">--</div></div>
+      <div class="card green"><div class="label">低估买入 (绿)</div><div class="value" id="dashOnSale">--</div></div>
+      <div class="card gray"><div class="label">观望 (灰)</div><div class="value" id="dashWatch">--</div></div>
+      <div class="card red"><div class="label">高估卖出 (红)</div><div class="value" id="dashOver">--</div></div>
+    </div>
+
+    <div class="alert info">
+      💡 <b>火麒麟价值投资综合评估系统</b> 是一款免费的 A 股价值投资分析工具, 采用 Benjamin Graham + Warren Buffett 经典价值投资公式 (100 分制评分 + MOS 安全边际), 数据完全来自公开免费源.
+    </div>
+
+    <h2 style="margin-top:24px">最近低估买入 (按 Score 排序)</h2>
+    <table id="dashTable">
+      <thead>
+        <tr>
+          <th>代码</th><th>名称</th><th>价格</th><th>涨跌</th>
+          <th>火麒麟评分</th><th>安全边际</th><th>合理价</th><th>信号</th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="8" class="loading"><span class="spinner"></span>正在加载...</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ========== 智能筛选 ========== -->
+  <div class="page" id="page-screen" style="display:none">
+    <h1>智能筛选</h1>
+    <p class="sub">按火麒麟 100 分制评分体系筛选 A 股 (评分越高越安全 / MOS 越大越低估)</p>
+
+    <div class="filterbar">
+      <select id="fSummary">
+        <option value="all">全部信号</option>
+        <option value="on_sale">低估买入 (绿)</option>
+        <option value="watch">观望 (灰)</option>
+        <option value="overpriced">高估卖出 (红)</option>
+      </select>
+      <label>最低评分 <input id="fMinScore" type="number" value="50" min="0" max="100"></label>
+      <label>最低 MOS% <input id="fMinMos" type="number" value="0" min="0" max="100"></label>
+      <select id="fMarket">
+        <option value="all">全市场</option>
+        <option value="sh">沪市</option>
+        <option value="sz">深市</option>
+        <option value="bj">北交所</option>
+      </select>
+      <label>数量 <input id="fLimit" type="number" value="30" min="5" max="200" style="width:70px"></label>
+      <button id="fRun">开始筛选</button>
+      <span class="muted" id="fStatus"></span>
+    </div>
+
+    <table id="screenTable">
+      <thead>
+        <tr>
+          <th>代码</th><th>名称</th><th>行业</th><th>价格</th>
+          <th>火麒麟评分</th><th>安全边际</th><th>合理价</th><th>信号</th><th></th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="9" class="muted" style="text-align:center;padding:30px">点击 "开始筛选" 加载数据</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ========== 自选股 ========== -->
+  <div class="page" id="page-watchlist" style="display:none">
+    <h1>自选股</h1>
+    <p class="sub">自动跟踪评分变化, 第一时间发现低估机会</p>
+    <table id="wlTable">
+      <thead>
+        <tr><th>代码</th><th>名称</th><th>价格</th><th>火麒麟评分</th><th>安全边际</th><th>信号</th><th>操作</th></tr>
+      </thead>
+      <tbody><tr><td colspan="7" class="muted" style="text-align:center;padding:30px">暂无自选股, 在股票详情页或筛选器点击 ☆ 添加</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ========== 投资组合 ========== -->
+  <div class="page" id="page-portfolio" style="display:none">
+    <h1>投资组合</h1>
+    <p class="sub">手动记录持仓, 自动计算成本 / 盈亏 / 占比</p>
+    <div class="alert warn">⚠️ 投资组合数据存储在本地, 不联网同步, 换电脑请备份 <span class="kbd">assets/portfolio.json</span></div>
+
+    <div class="cards">
+      <div class="card"><div class="label">组合名称</div>
+        <input id="pfName" value="默认组合" style="background:var(--bg-2);border:1px solid var(--bd);color:var(--fg);padding:6px 10px;border-radius:6px">
+      </div>
+      <div class="card"><div class="label">总市值</div><div class="value" id="pfTotal">¥0</div></div>
+      <div class="card"><div class="label">总盈亏</div><div class="value" id="pfPL">¥0</div></div>
+      <div class="card"><div class="label">持仓数</div><div class="value" id="pfCount">0</div></div>
+    </div>
+
+    <div class="filterbar">
+      <select id="pfCodeSel"><option value="">选择股票...</option></select>
+      <input id="pfQty" type="number" placeholder="数量(股)" style="width:120px">
+      <input id="pfCost" type="number" placeholder="买入价" style="width:120px">
+      <button id="pfAdd">买入记录</button>
+    </div>
+
+    <table id="pfTable">
+      <thead>
+        <tr><th>代码</th><th>名称</th><th>数量</th><th>成本</th><th>现价</th><th>市值</th><th>盈亏</th><th>操作</th></tr>
+      </thead>
+      <tbody><tr><td colspan="8" class="muted" style="text-align:center;padding:30px">暂无持仓</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ========== 投资课堂 ========== -->
+  <div class="page" id="page-learn" style="display:none">
+    <h1>投资课堂</h1>
+    <p class="sub">火麒麟把经典价值投资评分公式翻译成中文, 让每个投资者都能复算</p>
+
+    <div class="detail-card" style="margin-bottom:14px">
+      <h2>什么是火麒麟评分?</h2>
+      <p>火麒麟评分是一套 100 分制的财务健康评分, 基于 Benjamin Graham + Warren Buffett 经典价值投资公式. 分数越高代表公司财务越健康. 满分 100 分, 投资界普遍认为 50 分以上的公司才算"财务健康".</p>
+      <p>评分由 8 个维度组成, 每项按权重累加:</p>
+      <div class="score-row"><span class="name">ROIC (投入资本回报率)</span><span class="pts">30 分</span><span class="bar"><span class="bar-fill" style="width:30%"></span></span></div>
+      <div class="score-row"><span class="name">销售增长 (Sales Growth)</span><span class="pts">16 分</span><span class="bar"><span class="bar-fill" style="width:16%"></span></span></div>
+      <div class="score-row"><span class="name">权益增长 (Equity Growth)</span><span class="pts">16 分</span><span class="bar"><span class="bar-fill" style="width:16%"></span></span></div>
+      <div class="score-row"><span class="name">EPS 增长 (每股盈利)</span><span class="pts">16 分</span><span class="bar"><span class="bar-fill" style="width:16%"></span></span></div>
+      <div class="score-row"><span class="name">自由现金流增长</span><span class="pts">8 分</span><span class="bar"><span class="bar-fill" style="width:8%"></span></span></div>
+      <div class="score-row"><span class="name">总资产增长</span><span class="pts">8 分</span><span class="bar"><span class="bar-fill" style="width:8%"></span></span></div>
+      <div class="score-row"><span class="name">净利润增长</span><span class="pts">3 分</span><span class="bar"><span class="bar-fill" style="width:3%"></span></span></div>
+      <div class="score-row"><span class="name">总负债下降</span><span class="pts">3 分</span><span class="bar"><span class="bar-fill" style="width:3%"></span></span></div>
+    </div>
+
+    <div class="detail-card" style="margin-bottom:14px">
+      <h2>什么是 MOS (安全边际)?</h2>
+      <p>MOS = Margin of Safety, 是巴菲特最重视的概念. 计算公式: <span class="kbd">MOS = 100% - (股价 / 合理价)</span></p>
+      <p>MOS 越高代表股票越被低估. 火麒麟推荐 50% 以上为买入区.</p>
+      <p><b>合理价计算:</b> 火麒麟采用 Benjamin Graham 简化公式 <span class="kbd">合理价 = EPS × (8.5 + 2 × 增长率)</span></p>
+    </div>
+
+    <div class="detail-card">
+      <h2>红绿灯信号</h2>
+      <p><span class="signal onsale">低估买入</span> 评分 ≥ 50 且 MOS ≥ 50% — 财务健康且价格低估, 买入区</p>
+      <p><span class="signal watch">观望</span> 评分 ≥ 50 或 MOS ≥ 50% — 只有一项达标, 持续关注</p>
+      <p><span class="signal over">高估卖出</span> 评分 &lt; 50 且 MOS &lt; 50% — 财务不健康且价格高估, 卖出区</p>
+    </div>
+  </div>
+
+  <!-- ========== 关于系统 ========== -->
+  <div class="page" id="page-about" style="display:none">
+    <h1>关于系统</h1>
+    <div class="detail-card">
+      <h2>火麒麟 · 价值投资综合评估系统</h2>
+      <p>本系统按 <b>Benjamin Graham + Warren Buffett 经典价值投资公式 (100 分制评分 + MOS 安全边际)</b> 实现, 完全本地运行, 无需联网账号.</p>
+      <h3 style="margin-top:20px">数据来源 (全部公开免费)</h3>
+      <ul>
+        <li><span class="kbd">finshare</span> — 综合库, 聚合东方财富 / 腾讯 / 新浪 / 通达信 / BaoStock / Yahoo Finance</li>
+        <li><span class="kbd">东方财富 push2</span> — A 股行情 / 财务数据 / 龙虎榜 / 融资融券</li>
+        <li><span class="kbd">腾讯财经 qt.gtimg.cn</span> — A 股实时报价</li>
+        <li><span class="kbd">新浪财经 hq.sinajs.cn</span> — A 股实时报价 (兜底源)</li>
+        <li><span class="kbd">BaoStock</span> — 全 A 股证券清单 / 行业分类 (不限流)</li>
+      </ul>
+      <h3 style="margin-top:20px">算法出处</h3>
+      <p>本系统基于以下经典价值投资公式实现, 全部为公开理论:</p>
+      <ul>
+        <li>Benjamin Graham 合理价公式: <span class="kbd">Fair Value = EPS × (8.5 + 2 × 增长率)</span></li>
+        <li>MOS 安全边际 (Margin of Safety): <span class="kbd">100% - (股价 / 合理价)</span></li>
+        <li>100 分制健康评分: ROIC / 销售增长 / 权益增长 / EPS 增长 / FCF 增长 / 资产增长 / 净利增长 / 负债下降 八个维度</li>
+        <li>红绿灯判定: Score ≥ 50 且 MOS ≥ 50% → 低估买入区</li>
+      </ul>
+      <h3 style="margin-top:20px">免责声明</h3>
+      <p class="muted">本系统仅作为投资分析工具, 所有数据按公开公式计算. 不构成任何投资建议. 投资有风险, 入市需谨慎.</p>
+    </div>
+  </div>
+
+  <!-- ========== 单股详情 (动态弹出) ========== -->
+  <div class="page" id="page-detail" style="display:none">
+    <button onclick="go('dashboard')" style="background:transparent;border:1px solid var(--bd);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;margin-bottom:14px">← 返回</button>
+    <div class="detail-grid">
+      <div class="detail-card" id="dCard">
+        <h2 id="dName">--</h2>
+        <p class="muted" id="dCode">--</p>
+        <div class="big-score">
+          <div class="num" id="dScore">--</div>
+          <div class="lbl">/ 100 分</div>
+        </div>
+        <div style="text-align:center;margin:8px 0 18px"><span class="signal" id="dSignal">--</span></div>
+        <div class="kv"><span class="k">现价</span><span class="v" id="dPrice">--</span></div>
+        <div class="kv"><span class="k">合理价</span><span class="v" id="dFair">--</span></div>
+        <div class="kv"><span class="k">安全边际</span><span class="v" id="dMos">--</span></div>
+        <div class="kv"><span class="k">今开</span><span class="v" id="dOpen">--</span></div>
+        <div class="kv"><span class="k">昨收</span><span class="v" id="dPrev">--</span></div>
+        <div class="kv"><span class="k">最高</span><span class="v" id="dHigh">--</span></div>
+        <div class="kv"><span class="k">最低</span><span class="v" id="dLow">--</span></div>
+        <div class="kv"><span class="k">成交量</span><span class="v" id="dVol">--</span></div>
+        <div style="text-align:center;margin-top:16px">
+          <button id="dWatch" style="background:var(--ac);color:#1a1a1a;border:0;padding:8px 20px;border-radius:6px;cursor:pointer;font-weight:600">☆ 加入自选</button>
+        </div>
+      </div>
+      <div class="detail-card">
+        <h2>评分细则</h2>
+        <div id="dBreakdown"></div>
+        <p class="muted" style="margin-top:14px;font-size:12px">* ROIC = EBITA / (负债 + 权益); 火麒麟版用 净利润 / (负债 + 权益) 简化. 权重基于经典价值投资理论.</p>
+        <p class="muted" style="font-size:12px">* 数据源: finshare (东方财富公开接口), 100% 公开免费.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ============================================================================
+// 火麒麟 前端逻辑 (PyWebView 内部, 通过 127.0.0.1:38471 API)
+// ============================================================================
+const API = "";  // 同源 (PyWebView 加载本地 http://127.0.0.1:38471/index.html)
+
+let STOCK_LIST = [];   // 缓存清单
+let DETAIL_CODE = null;
+
+// ---- 工具 ----
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+async function jget(p) {
+  const r = await fetch(API + p);
+  if (!r.ok) throw new Error(p + " " + r.status);
+  return r.json();
+}
+async function jpost(p, body) {
+  const r = await fetch(API + p, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body||{})});
+  return r.json();
+}
+async function jdel(p) {
+  const r = await fetch(API + p, {method:"DELETE"});
+  return r.json();
+}
+function fmt(n, d=2) {
+  if (n===null||n===undefined||isNaN(n)) return "--";
+  return Number(n).toLocaleString("zh-CN", {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function pct(n) { return (n>=0?"+":"") + fmt(n) + "%"; }
+function cls(s) {
+  if (s === "低估买入" || s === "On Sale") return "onsale";
+  if (s === "观望"      || s === "Watch")   return "watch";
+  return "over";
+}
+function summaryLabel(s) {
+  return s;  // 已经是中文
+}
+
+// ---- 页面切换 ----
+function go(page, arg) {
+  $$(".page").forEach(p => p.style.display = "none");
+  $("#page-" + page).style.display = "block";
+  $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.page === page));
+  if (page === "dashboard") loadDashboard();
+  if (page === "screen")    {} // 等用户点按钮
+  if (page === "watchlist") loadWatchlist();
+  if (page === "portfolio") loadPortfolio();
+  if (page === "detail" && arg) loadDetail(arg);
+}
+
+// ---- 概览 ----
+async function loadDashboard() {
+  // 概览页: 不跑完整评分 (太慢, 80 只 x 4s = 5 分钟), 只拉全市场清单 + 实时价
+  // 让用户去 "智能筛选" 页主动跑评分
+  $("#dashTable tbody").innerHTML = '<tr><td colspan="8" class="loading"><span class="spinner"></span>正在加载市场清单...</td></tr>';
+  try {
+    const list = await jget("/api/stocks");
+    STOCK_LIST = list;
+    $("#dashCount").textContent = list.length;
+    // 用腾讯分批拉行情 (200 只一批, 1 秒左右)
+    $("#dashTable tbody").innerHTML = '<tr><td colspan="8" class="loading"><span class="spinner"></span>正在拉取实时行情...</td></tr>';
+    const codes = list.filter(s => s.type === "stock").slice(0, 100).map(s => s.code);
+    const quotes = await jget("/api/quotes?codes=" + encodeURIComponent(codes.join(",")));
+    // 排序: 涨跌幅从高到低
+    const rows = Object.values(quotes).sort((a,b) => (b.change_pct||0) - (a.change_pct||0)).slice(0, 50);
+    $("#dashTable tbody").innerHTML = rows.map(q => {
+      const upDown = (q.change_pct||0) >= 0 ? "up" : "down";
+      return `<tr data-code="${q.code}">
+        <td><b>${q.code.split('.')[0]}</b></td>
+        <td>${q.name}</td>
+        <td class="num">¥${fmt(q.price)}</td>
+        <td class="num ${upDown}">${pct(q.change_pct||0)}</td>
+        <td class="num muted">--</td>
+        <td class="num muted">--</td>
+        <td class="num muted">--</td>
+        <td><span class="signal watch">点我评分</span></td>
+      </tr>`;
+    }).join("");
+    // 信号计数先空
+    $("#dashOnSale").textContent = "-";
+    $("#dashWatch").textContent = "-";
+    $("#dashOver").textContent = "-";
+    $$("#dashTable tbody tr").forEach(tr => tr.onclick = () => go("detail", tr.dataset.code));
+  } catch (e) {
+    $("#dashTable tbody").innerHTML = '<tr><td colspan="8" class="muted" style="text-align:center;padding:30px">加载失败: '+e.message+'<br><br>💡 提示: 实时行情需联网, 请检查网络后刷新</td></tr>';
+  }
+}
+
+// ---- 表格行 ----
+function rowHtml(it) {
+  const c = cls(it.summary);
+  const code = it.code;
+  const p = it.quote ? it.quote.price : it.share_price || 0;
+  const chg = it.quote ? it.quote.change_pct : 0;
+  const upDown = chg >= 0 ? "up" : "down";
+  return `<tr data-code="${code}">
+    <td><b>${code.split('.')[0]}</b></td>
+    <td>${it.name}</td>
+    <td class="num">¥${fmt(p)}</td>
+    <td class="num ${upDown}">${pct(chg)}</td>
+    <td class="num"><b>${it.score||0}</b></td>
+    <td class="num">${fmt(it.mos||0)}%</td>
+    <td class="num">${it.fair_value>0 ? "¥"+fmt(it.fair_value) : "--"}</td>
+    <td><span class="signal ${c}">${it.summary || "--"}</span></td>
+  </tr>`;
+}
+
+// ---- 筛选 ----
+$("#fRun").onclick = async () => {
+  const summary = $("#fSummary").value;
+  const minScore = $("#fMinScore").value || 0;
+  const minMos = $("#fMinMos").value || 0;
+  const market = $("#fMarket").value;
+  const limit = parseInt($("#fLimit").value) || 30;
+  $("#fStatus").innerHTML = '<span class="spinner"></span>正在拉清单...';
+  $("#screenTable tbody").innerHTML = '<tr><td colspan="9" class="loading"><span class="spinner"></span>正在加载证券清单...</td></tr>';
+  try {
+    // 1) 拉清单
+    const list = await jget("/api/stocks");
+    STOCK_LIST = list;
+    let stocks = list.filter(s => s.type === "stock");
+    if (market !== "all") stocks = stocks.filter(s => s.code.toLowerCase().startsWith(market + "."));
+    // 取前 N 只 (按代码顺序, 沪市先)
+    const targets = stocks.slice(0, limit);
+
+    // 2) 先批量拉行情 (快, 1 秒)
+    $("#fStatus").innerHTML = '<span class="spinner"></span>已选 ' + targets.length + ' 只, 拉行情...';
+    const codes = targets.map(s => s.code);
+    const quotes = await jget("/api/quotes?codes=" + encodeURIComponent(codes.join(",")));
+
+    // 3) 逐只评分, 显示进度
+    const rows = [];
+    for (let i = 0; i < targets.length; i++) {
+      const s = targets[i];
+      const q = quotes[s.code];
+      if (!q) continue;
+      $("#fStatus").innerHTML = `<span class="spinner"></span>评分进度: ${i+1}/${targets.length} — ${s.name}`;
+      try {
+        const r = await jget("/api/score/" + encodeURIComponent(s.code));
+        // 过滤
+        if (summary !== "all" && r.summary !== ({on_sale:"低估买入",watch:"观望",overpriced:"高估卖出"}[summary] || summary)) continue;
+        if ((r.score||0) < minScore) continue;
+        if ((r.mos||0) < minMos) continue;
+        rows.push(r);
+      } catch (e) {
+        // 跳过失败的
+      }
+    }
+
+    $("#fStatus").textContent = `共 ${rows.length} 只`;
+    if (!rows.length) {
+      $("#screenTable tbody").innerHTML = '<tr><td colspan="9" class="muted" style="text-align:center;padding:30px">无符合条件的股票<br><br>💡 试试调低 "最低评分" / "最低 MOS%", 或换市场</td></tr>';
+      return;
+    }
+    rows.sort((a, b) => (b.score||0) - (a.score||0));
+    $("#screenTable tbody").innerHTML = rows.map(it => {
+      const base = rowHtml(it);
+      return base.replace("</tr>", `<td><button class="addWl" data-code="${it.code}" style="background:transparent;border:1px solid var(--bd);color:var(--fg);padding:4px 10px;border-radius:4px;cursor:pointer">+ 自选</button></td></tr>`);
+    }).join("");
+    $$("#screenTable tbody tr").forEach(tr => {
+      // 行点击进详情
+      const code = tr.dataset.code;
+      tr.onclick = (e) => {
+        if (e.target.classList.contains("addWl")) return;
+        go("detail", code);
+      };
+    });
+    $$(".addWl").forEach(b => b.onclick = async (e) => {
+      e.stopPropagation();
+      await jpost("/api/watchlist", {code: b.dataset.code});
+      b.textContent = "✓ 已加";
+      b.disabled = true;
+    });
+  } catch (e) {
+    $("#fStatus").textContent = "失败: " + e.message;
+  }
+};
+
+// ---- 自选股 ----
+async function loadWatchlist() {
+  const wl = await jget("/api/watchlist");
+  if (!wl.length) {
+    $("#wlTable tbody").innerHTML = '<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">暂无自选股</td></tr>';
+    return;
+  }
+  $("#wlTable tbody").innerHTML = '<tr><td colspan="7" class="loading"><span class="spinner"></span>加载 ' + wl.length + ' 只...</td></tr>';
+  const rows = [];
+  for (const code of wl) {
+    try {
+      const it = await jget("/api/score/" + encodeURIComponent(code));
+      rows.push(it);
+    } catch (e) {}
+  }
+  if (!rows.length) {
+    $("#wlTable tbody").innerHTML = '<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">加载失败</td></tr>';
+    return;
+  }
+  $("#wlTable tbody").innerHTML = rows.map(it => `
+    <tr data-code="${it.code}">
+      <td><b>${it.code.split('.')[0]}</b></td>
+      <td>${it.name}</td>
+      <td class="num">¥${fmt(it.share_price)}</td>
+      <td class="num"><b>${it.score||0}</b></td>
+      <td class="num">${fmt(it.mos||0)}%</td>
+      <td><span class="signal ${cls(it.summary)}">${it.summary}</span></td>
+      <td><button class="rmWl" data-code="${it.code}" style="background:transparent;border:1px solid var(--bd);color:var(--red);padding:4px 10px;border-radius:4px;cursor:pointer">移除</button></td>
+    </tr>`).join("");
+  $$("#wlTable tbody tr").forEach(tr => {
+    tr.onclick = (e) => {
+      if (e.target.classList.contains("rmWl")) return;
+      go("detail", tr.dataset.code);
+    };
+  });
+  $$(".rmWl").forEach(b => b.onclick = async (e) => {
+    e.stopPropagation();
+    await jdel("/api/watchlist/" + encodeURIComponent(b.dataset.code));
+    loadWatchlist();
+  });
+}
+
+// ---- 详情 ----
+async function loadDetail(code) {
+  DETAIL_CODE = code;
+  $("#page-detail").style.display = "block";
+  $$(".page").forEach(p => { if (p.id !== "page-detail") p.style.display = "none"; });
+  $$("#nav button").forEach(b => b.classList.remove("active"));
+  // 立即显示行情 (行情快), 评分慢, 异步显示
+  $("#dName").textContent = "--";
+  $("#dCode").textContent = code;
+  $("#dScore").textContent = "--";
+  $("#dSignal").className = "signal watch";
+  $("#dSignal").textContent = "加载中";
+  $("#dBreakdown").innerHTML = '<div class="loading"><span class="spinner"></span>正在加载行情...</div>';
+  try {
+    const q = await jget("/api/quote/" + encodeURIComponent(code));
+    $("#dName").textContent = q.name;
+    $("#dCode").textContent = code + " · " + (q.market || "") + " 实时行情";
+    $("#dPrice").textContent = "¥" + fmt(q.price);
+    $("#dFair").textContent  = "计算中...";
+    $("#dMos").textContent   = "计算中...";
+    $("#dOpen").textContent  = "¥" + fmt(q.open);
+    $("#dPrev").textContent  = "¥" + fmt(q.prev_close);
+    $("#dHigh").textContent  = "¥" + fmt(q.high);
+    $("#dLow").textContent   = "¥" + fmt(q.low);
+    $("#dVol").textContent   = q.volume ? (q.volume/10000).toFixed(2) + " 万手" : "--";
+    // 评分单独异步, 显示进度
+    $("#dBreakdown").innerHTML = '<div class="loading"><span class="spinner"></span>评分计算中 (财务三表 + 16 季度 TTM, 约 5~15 秒)...</div>';
+    try {
+      const it = await jget("/api/score/" + encodeURIComponent(code));
+      $("#dScore").textContent = it.score || 0;
+      $("#dSignal").className = "signal " + cls(it.summary);
+      $("#dSignal").textContent = it.summary;
+      $("#dFair").textContent = it.fair_value > 0 ? "¥" + fmt(it.fair_value) : "--";
+      $("#dMos").textContent = fmt(it.mos) + "%";
+      const total = it.max_score || 100;
+      $("#dBreakdown").innerHTML = Object.entries(it.breakdown || {}).map(([k, v]) => {
+        const m = k.match(/\((\d+)\)/);
+        const max = m ? parseInt(m[1]) : 4;
+        const w = (v / max) * 100;
+        return `<div class="score-row">
+          <span class="name">${k.replace(/\(\d+\)/, "")}</span>
+          <span class="pts">${v} / ${max}</span>
+          <span class="bar"><span class="bar-fill" style="width:${w}%"></span></span>
+        </div>`;
+      }).join("") || '<div class="muted">无评分数据</div>';
+      if (it.error) $("#dBreakdown").innerHTML += '<div class="muted" style="margin-top:10px;font-size:12px">' + it.error + '</div>';
+      $("#dWatch").onclick = async () => {
+        await jpost("/api/watchlist", {code: it.code});
+        $("#dWatch").textContent = "✓ 已加入自选";
+      };
+    } catch (se) {
+      $("#dBreakdown").innerHTML = '<div class="muted">评分失败: ' + se.message + '<br>💡 东财接口可能临时风控, 请稍后重试</div>';
+    }
+    $("#dWatch").textContent = "☆ 加入自选";
+  } catch (e) {
+    $("#dBreakdown").innerHTML = '<div class="muted">行情获取失败: ' + e.message + '<br>💡 请检查网络或稍后重试</div>';
+  }
+}
+
+// ---- 搜索 ----
+$("#search").oninput = async (e) => {
+  const q = e.target.value.trim();
+  if (!q) { $("#dropdown").style.display = "none"; return; }
+  if (!STOCK_LIST.length) STOCK_LIST = await jget("/api/stocks");
+  const hits = STOCK_LIST.filter(it => it.code.includes(q.toUpperCase()) || it.name.includes(q)).slice(0, 20);
+  $("#dropdown").innerHTML = hits.map(it => `
+    <div class="item" data-code="${it.code}">
+      <b>${it.name}</b><span class="code">${it.code} · ${it.type === "etf" ? "ETF" : (it.type === "fund" ? "基金" : "股票")}${it.industry ? " · " + it.industry : ""}</span>
+    </div>`).join("");
+  $("#dropdown").style.display = hits.length ? "block" : "none";
+  $$("#dropdown .item").forEach(el => el.onclick = () => {
+    $("#dropdown").style.display = "none";
+    $("#search").value = "";
+    go("detail", el.dataset.code);
+  });
+};
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".search")) $("#dropdown").style.display = "none";
+});
+
+// ---- 投资组合 (本地存储, 极简版) ----
+const PF_KEY = "huoqilin_portfolio";
+function getPF() { try { return JSON.parse(localStorage.getItem(PF_KEY) || "{}"); } catch { return {}; } }
+function savePF(p) { localStorage.setItem(PF_KEY, JSON.stringify(p)); }
+
+async function loadPortfolio() {
+  const pf = getPF();
+  const items = Object.values(pf);
+  $("#pfCount").textContent = items.length;
+  let total = 0, costTotal = 0;
+  for (const it of items) {
+    try {
+      const q = await jget("/api/quote/" + encodeURIComponent(it.code));
+      it.price = q.price;
+      total += q.price * it.qty;
+      costTotal += it.cost * it.qty;
+    } catch {}
+  }
+  $("#pfTotal").textContent = "¥" + fmt(total);
+  const pl = total - costTotal;
+  const plEl = $("#pfPL");
+  plEl.textContent = (pl>=0?"+":"") + "¥" + fmt(pl);
+  plEl.className = "value " + (pl>=0 ? "up" : "down");
+  // 表格
+  if (!items.length) {
+    $("#pfTable tbody").innerHTML = '<tr><td colspan="8" class="muted" style="text-align:center;padding:30px">暂无持仓</td></tr>';
+    return;
+  }
+  $("#pfTable tbody").innerHTML = items.map(it => {
+    const mv = it.price * it.qty;
+    const pl2 = (it.price - it.cost) * it.qty;
+    return `<tr data-code="${it.code}">
+      <td><b>${it.code.split('.')[0]}</b></td>
+      <td>${it.name}</td>
+      <td class="num">${it.qty}</td>
+      <td class="num">¥${fmt(it.cost)}</td>
+      <td class="num">¥${fmt(it.price)}</td>
+      <td class="num">¥${fmt(mv)}</td>
+      <td class="num ${pl2>=0?"up":"down"}">${pl2>=0?"+":""}¥${fmt(pl2)}</td>
+      <td><button class="rmPF" data-code="${it.code}" style="background:transparent;border:1px solid var(--bd);color:var(--red);padding:4px 10px;border-radius:4px;cursor:pointer">移除</button></td>
+    </tr>`;
+  }).join("");
+  $$(".rmPF").forEach(b => b.onclick = () => {
+    const pf2 = getPF(); delete pf2[b.dataset.code]; savePF(pf2); loadPortfolio();
+  });
+  // 填充选择框
+  const sel = $("#pfCodeSel");
+  if (sel.options.length <= 1) {
+    STOCK_LIST = await jget("/api/stocks");
+    sel.innerHTML = '<option value="">选择股票...</option>' + STOCK_LIST.slice(0, 500).map(it => `<option value="${it.code}">${it.code} ${it.name}</option>`).join("");
+  }
+}
+$("#pfAdd").onclick = () => {
+  const code = $("#pfCodeSel").value;
+  const qty = parseInt($("#pfQty").value || 0);
+  const cost = parseFloat($("#pfCost").value || 0);
+  if (!code || !qty || !cost) { alert("请填写完整: 股票 / 数量 / 买入价"); return; }
+  const name = $("#pfCodeSel").selectedOptions[0].text.split(" ").slice(1).join(" ");
+  const pf = getPF();
+  if (pf[code]) {
+    // 加权平均成本
+    const old = pf[code];
+    const newQty = old.qty + qty;
+    pf[code] = {code, name, qty: newQty, cost: (old.qty*old.cost + qty*cost) / newQty};
+  } else {
+    pf[code] = {code, name, qty, cost};
+  }
+  savePF(pf);
+  $("#pfQty").value = ""; $("#pfCost").value = "";
+  loadPortfolio();
+};
+
+// ---- 顶栏 ----
+$$("#nav button").forEach(b => b.onclick = () => go(b.dataset.page));
+
+// ---- 启动 ----
+go("dashboard");
+</script>
+</body>
+</html>

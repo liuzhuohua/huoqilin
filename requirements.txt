@@ -1,0 +1,15 @@
+# 火麒麟 · 价值投资综合评估系统 — 依赖
+# 算法: Benjamin Graham + Warren Buffett 经典价值投资公式
+# 数据源: finshare 库 (东财/腾讯/新浪/BaoStock/Yahoo Finance) - 公开免费
+
+finshare>=2.0.0          # 金融数据获取 (核心)
+baostock>=0.8.9          # 全 A 股证券清单 (兜底源)
+pandas>=2.0.0            # 数据处理
+requests>=2.28.0         # HTTP
+bottle>=0.12.19          # 内置 HTTP server (pywebview 自带)
+
+# 桌面壳
+pywebview>=5.0           # Edge WebView2 包装 (Windows 单 exe ~30MB)
+
+# 打包工具 (可选)
+pyinstaller>=6.0         # 单 exe 打包

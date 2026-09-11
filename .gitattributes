@@ -1,0 +1,28 @@
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Python source — keep LF (PEP 8)
+*.py text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Docs
+*.md text eol=lf
+README* text eol=lf
+
+# Configs
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+
+# HTML / JS / CSS (前端)
+*.html text eol=lf
+*.js text eol=lf
+*.css text eol=lf
