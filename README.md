@@ -120,9 +120,7 @@ huoqilin/
 ├── LICENSE                   # MIT
 ├── .gitignore
 ├── .gitattributes
-├── .github/
-│   └── workflows/
-│       └── ci.yml            # GitHub Actions CI (lint + import smoke)
+├── .github/workflows/         # 暂未启用 (OAuth token 缺 workflow scope)
 ├── firekylin/                # 核心 Python 包
 │   ├── __init__.py
 │   ├── api.py                # Bottle HTTP API + 静态文件服务
